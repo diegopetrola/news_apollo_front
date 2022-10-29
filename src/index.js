@@ -1,18 +1,36 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './styles/index.css';
-import App from './components/App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./styles/index.css";
+import App from "./components/App";
+import reportWebVitals from "./reportWebVitals";
+import { BrowserRouter } from "react-router-dom";
+import { setContext } from "@apollo/client/link/context";
 
-import {ApolloProvider, ApolloClient, createHttpLink, InMemoryCache} from '@apollo/client';
+import {
+  ApolloProvider,
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache,
+} from "@apollo/client";
+import { AUTH_TOKEN } from "./constants";
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4000'
+  uri: "http://localhost:4000",
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem(AUTH_TOKEN);
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    },
+  };
 });
 
 const client = new ApolloClient({
-  link: httpLink,
-  cache: new InMemoryCache()
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache(),
 });
 
 // const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -21,11 +39,13 @@ const client = new ApolloClient({
 //     <App />
 //   </React.StrictMode>
 // );
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <ApolloProvider client={client}>
-    <App />
-  </ApolloProvider>
+  <BrowserRouter>
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
+  </BrowserRouter>
 );
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

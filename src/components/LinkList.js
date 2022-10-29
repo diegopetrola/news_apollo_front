@@ -16,6 +16,7 @@ const FEED_QUERY = gql`{
 
 const LinkList = () => {
   const {data} = useQuery(FEED_QUERY);
+  console.log(data);
   return <>
       {data && (data.feed.links.map((link) => (
         <Link key={link.id} link={link} />
